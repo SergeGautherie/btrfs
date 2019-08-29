@@ -2,6 +2,7 @@
 # https://docs.microsoft.com/en-us/cpp/build/how-to-modify-the-target-framework-and-platform-toolset?view=vs-2019
 #   2015 = v140, 2017 = v141, 2019 = v142, ABI-backwards-compatible.
 image:
+#   - Visual Studio 2015
 # 
   - Visual Studio 2017
     # Slow to start: on demand :-|
@@ -68,6 +69,42 @@ after_build:
 test: off
 
 for:
+-
+  matrix:
+    only:
+      - image: Visual Studio 2015
+
+  build:
+    project: btrfs_noCpp17.sln
+    verbosity: quiet
+
+  before_build:
+ # "std::string_view was introduced in C++17, which is only supported from VS 2017 15.0(+)."
+ # Then VS 2015 can't build shellbtrfs!
+ # (How to edit the files _from command line_ to remove it? Or select targets from AppV?)
+ # Is it possible to revert only Shell to its "v1.1"(!?)?
+#
+# Required: 
+    - for %%p in (*.vcxproj) do  sed -i "s|<PlatformToolset>v14.<|<PlatformToolset>v140<|g" %%p
+      # 'error MSB8036: The Windows SDK version NNN was not found.':
+      #   (10.0.18362.1,) 10.0, 10, 8.0, 8.
+ # 8.1 found, but error: shellbtrfs, 'error C2011: '_FSCTL_GET_INTEGRITY_INFORMATION_BUFFER': 'struct' type redefinition'! + no string_view support + 1 last error.
+ # 10.0.18362.0 found, but error: shellbtrfs, no string_view support + 1 last error.
+    - for %%p in (*.vcxproj) do  sed -i "s|<WindowsTargetPlatformVersion>10\.0<|<WindowsTargetPlatformVersion>10.0.18362.0<|g" %%p
+ # 'C:\Program Files (x86)\Windows Kits\10\build\WindowsDriver.OS.props(250,11): error MSB4086: A numeric comparison was attempted on "$(SUBSYSTEM_NATVER)" that evaluates to "" instead of a number, in condition "'$(MIDL_TARGET)' == '$(MIDL_TARGET_VISTA)' AND $(SUBSYSTEM_NATVER) < 6.00". [C:\projects\btrfs\btrfs.vcxproj]'
+# Caused by VS2015/[W]SDK itself, or AppVeyor-specific?
+#
+# 7600.16385.1.
+#     - dir C:\WinDDK\
+# v7.0, v7.0A, v7.1, v7.1A, v8.0, v8.0A, v8.1, v8.1A, v10.0A
+#     - dir "C:\Program Files (x86)\Microsoft SDKs\Windows\"
+# 10.
+#     - dir "C:\Program Files (x86)\Microsoft SDKs\Windows Kits\"
+# 8.0, 8.1 and 10.
+#     - dir "C:\Program Files (x86)\Windows Kits\"
+#
+## RDP: Check/try upgrade of VS/SDKs.
+#     - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 -
   matrix:
     only:
