@@ -46,7 +46,13 @@ static wstring get_mountdev_name(const nt_handle& h ) {
 
     ULONG mdnsize = (ULONG)offsetof(MOUNTDEV_NAME, Name[0]) + mdn.NameLength;
 
+/* Why malloc() instead of ExAllocatePool[WithTag]() in shellext project? */
     mdn2 = (MOUNTDEV_NAME*)malloc(mdnsize);
+/* malloc() result is never checked, at least in this file. Why? */
+/*
+    if (!mdn2)
+        return L"";
+*/
 
     Status = NtDeviceIoControlFile(h, nullptr, nullptr, nullptr, &iosb, IOCTL_MOUNTDEV_QUERY_DEVICE_NAME,
                                    nullptr, 0, mdn2, mdnsize);

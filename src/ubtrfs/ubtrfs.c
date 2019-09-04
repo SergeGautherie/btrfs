@@ -1290,8 +1290,20 @@ end:
             MOUNTDEV_NAME* mdn;
             ULONG mdnsize = (ULONG)offsetof(MOUNTDEV_NAME, Name[0]) + DriveRoot->Length;
 
+/* Why malloc() instead of ExAllocatePool[WithTag]() in ubtrfs project? */
+/* malloc() result is cast'ed in all files but the current one: why there? why not here? */
             mdn = malloc(mdnsize);
+/* malloc() result is never checked, at least in this file. Why? */
+/*
+            if (mdn) {
+              mdn->NameLength = DriveRoot->Length;
+              memcpy(mdn->Name, DriveRoot->Buffer, DriveRoot->Length);
 
+              NtDeviceIoControlFile(btrfsh, NULL, NULL, NULL, &iosb, IOCTL_BTRFS_PROBE_VOLUME, mdn, mdnsize, NULL, 0);
+
+              free(mdn);
+            }
+*/
             mdn->NameLength = DriveRoot->Length;
             memcpy(mdn->Name, DriveRoot->Buffer, DriveRoot->Length);
 
