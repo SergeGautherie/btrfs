@@ -1,7 +1,11 @@
 # WinBtrfs: VS2019 current master, VS2015 still/v1.4 "official" minimal, plus VS2010 as "unsupported" minimal.
 # https://docs.microsoft.com/en-us/cpp/build/how-to-modify-the-target-framework-and-platform-toolset?view=vs-2019
+#   (2012 = v110;)
+#   2013 = v120;
 #   2015 = v140, 2017 = v141, 2019 = v142, ABI-backwards-compatible.
 image:
+    # Slow to start: on demand :-|
+#   - Visual Studio 2013
 #   - Visual Studio 2015
 # 
   - Visual Studio 2017
@@ -69,6 +73,30 @@ after_build:
 test: off
 
 for:
+-
+  matrix:
+    only:
+      - image: Visual Studio 2013
+
+  build:
+    project: btrfs_noCpp17.sln
+    verbosity: quiet
+
+  before_build:
+ # 'error MSB8020: The build tools for WindowsKernelModeDriver10.0 (Platform Toolset = 'WindowsKernelModeDriver10.0') cannot be found.'
+ # WKMD8.1 found, but many errors...
+ #  btrfs: 'error C2065: 'FILE_DISPOSITION_INFORMATION_EX' : undeclared identifier' and more!
+# Required: 
+    - sed -i "s|<PlatformToolset>WindowsKernelModeDriver10\.0<|<PlatformToolset>WindowsKernelModeDriver8.1<|g" btrfs.vcxproj
+ # 'error MSB8020: The build tools for v142 (Platform Toolset = 'v142') cannot be found.'
+ # v120 found, but errors:
+ #  shellbtrfs, 'error C2011: '_FSCTL_GET_INTEGRITY_INFORMATION_BUFFER': 'struct' type redefinition' and more + no string_view support!
+ #  ubtrfs: 'fatal error C1083: Cannot open include file: 'ata.h': No such file or directory'
+# Required: 
+    - for %%p in (*.vcxproj) do  sed -i "s|<PlatformToolset>v14.<|<PlatformToolset>v120<|g" %%p
+#
+## RDP: Check/try upgrade of VS/SDKs.
+#     - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 -
   matrix:
     only:
