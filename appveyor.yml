@@ -6,12 +6,12 @@
 image:
     # Slow to start: on demand :-|
 #   - Visual Studio 2013
-#   - Visual Studio 2015
+# 
+  - Visual Studio 2015
 # 
   - Visual Studio 2017
     # Slow to start: on demand :-|
-# 
-  - Visual Studio 2019
+#   - Visual Studio 2019
     # Slow to start: on demand :-|
 #   - Visual Studio 2019 Preview
 
