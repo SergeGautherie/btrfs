@@ -196,10 +196,10 @@ for:
  # 'error MSB8020: The build tools for Visual Studio 2017 (Platform Toolset = 'v141') cannot be found.'
 # TestOnly:     - for %%p in (*.vcxproj) do  sed -i "s|<PlatformToolset>v14.<|<PlatformToolset>v141<|g" %%p
       # 'error MSB8036: The Windows SDK version NNN was not found.':
-      #   10.0, ²8.1.
-      # ²10.0.18362.0 found :-|
-## CfCommit: v141:     - sed -i "s|<WindowsTargetPlatformVersion>8\.1<|<WindowsTargetPlatformVersion>10.0<|g" mkbtrfs.vcxproj
-## v141:     - for %%p in (*.vcxproj) do  sed -i "s|<WindowsTargetPlatformVersion>10\.0<|<WindowsTargetPlatformVersion>8<|g" %%p
+      #   (10.0.18362.1,) 8.1, 8.0, 8.
+      # 10.0.18362.0, 10.0.17763.0, 10.0, 10 found :-|
+# CfCommit: v141:     - sed -i "s|<WindowsTargetPlatformVersion>8\.1<|<WindowsTargetPlatformVersion>10.0<|g" mkbtrfs.vcxproj
+## v141:     - for %%p in (*.vcxproj) do  sed -i "s|<WindowsTargetPlatformVersion>10\.0<|<WindowsTargetPlatformVersion>10<|g" %%p
 #
       # 'error MSB8036: The Windows SDK version NNN was not found.':
       #   (10.0.18362.1,) 8.1, 8.0, 8.
