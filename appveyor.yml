@@ -6,15 +6,16 @@
 image:
     # Slow to start: on demand :-|
 #   - Visual Studio 2013
-#   - Visual Studio 2015
+# 
+  - Visual Studio 2015
     # Fast to start: pre-heated :->
 #   - Visual Studio 2015 Preview
 # 
   - Visual Studio 2017
     # Slow to start: on demand :-|
 #   - Visual Studio 2017 Preview
-    # Slow to start: on demand :-|
-#   - Visual Studio 2019
+# 
+  - Visual Studio 2019
     # Slow to start: on demand :-|
 # 
   - Visual Studio 2019 Preview
@@ -37,7 +38,8 @@ clone_folder: C:\projects\btrfs
 #   - Debug
 #   - Release
 
-# init:
+# 
+init:
 # Guess try:
 # 2015, 2017 and 2019: Not set :-|
 #   - echo %VCTargetsPath%
@@ -50,7 +52,10 @@ clone_folder: C:\projects\btrfs
 #   - which sed
 #   - sed --help
 # later!?
-#   - msbuild -version
+# 
+  - where msbuild
+# 
+  - msbuild -version
 
 build:
   project: btrfs.sln
@@ -106,10 +111,11 @@ for:
 -
   matrix:
     only:
+        # (C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe).
         # (14.0.25420.1).
       - image: Visual Studio 2015
         # "obsolete" :-| (14.0.25420.1).
-      - image: Visual Studio 2015 Preview
+##       - image: Visual Studio 2015 Preview
 
 # When without 'string' commit.
   build:
@@ -138,7 +144,7 @@ for:
 #     - dir "C:\Program Files (x86)\Microsoft SDKs\Windows\"
 # 10.
 #     - dir "C:\Program Files (x86)\Microsoft SDKs\Windows Kits\"
-# 8.0, 8.1 and 10.
+# 8.0, 8.1, 10 and NETFXSDK.
 #     - dir "C:\Program Files (x86)\Windows Kits\"
 #
 ## RDP: Check/try upgrade of VS/SDKs.
@@ -146,10 +152,11 @@ for:
 -
   matrix:
     only:
+        # (C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe).
         # (15.9.21.664).
       - image: Visual Studio 2017
         # "obsolete" :-< (15.9.19.36755, + 'Windows SDK version 10.0.18362.0 was not found').
-      - image: Visual Studio 2017 Preview
+##       - image: Visual Studio 2017 Preview
 
 ##   environment:
 ##     additional_flags: /permissive-
@@ -171,7 +178,6 @@ for:
       #   (10.0.18362.1,) 10.0, 10, 8.0, 8.
  # 8.1 found, but error: shellbtrfs, 'error C2011: '_FSCTL_GET_INTEGRITY_INFORMATION_BUFFER': 'struct' type redefinition'!
       # 10.0.18362.0 found: success :-)
-# v141: 
     - for %%p in (*.vcxproj) do  sed -i "s|<WindowsTargetPlatformVersion>10\.0<|<WindowsTargetPlatformVersion>10.0.18362.0<|g" %%p
 # CfCommit:    - sed -i "s|<LanguageStandard>stdcpplatest<|<LanguageStandard>stdcpp17<|g" shellbtrfs.vcxproj
 #
@@ -182,7 +188,7 @@ for:
 #     - dir "C:\Program Files (x86)\Microsoft SDKs\Windows\"
 # 10.
 #     - dir "C:\Program Files (x86)\Microsoft SDKs\Windows Kits\"
-# 8.0, 8.1 and 10.
+# 8.0, 8.1, 10 and NETFXSDK.
 #     - dir "C:\Program Files (x86)\Windows Kits\"
 #
 ## RDP: Try conformance option.
@@ -190,7 +196,8 @@ for:
 -
   matrix:
     only:
-        # (16.3.0.46305).
+        # (C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe).
+        # (16.3.1.50202).
       - image: Visual Studio 2019
 
 ##   environment:
@@ -232,14 +239,14 @@ for:
 #     - for %%p in (*.vcxproj) do  sed -i "s|<WindowsTargetPlatformVersion>10\.0\.18362\.0<|<WindowsTargetPlatformVersion>10.0<|g" %%p
 # CfCommit:    - sed -i "s|<LanguageStandard>stdcpplatest<|<LanguageStandard>stdcpp17<|g" shellbtrfs.vcxproj
 #
-# v7.1A, v10.0A
+# v7.1A, v8.1A and v10.0A
 #     - dir "C:\Program Files (x86)\Microsoft SDKs\Windows\"
 # 10.
 #     - dir "C:\Program Files (x86)\Microsoft SDKs\Windows Kits\"
-# 8.1 and 10.
+# 8.1, 10 and NETFXSDK.
 #     - dir "C:\Program Files (x86)\Windows Kits\"
 #
-# TestOnly: to check installing missing v141 component. It works :-)
+# TestOnly: to check outdated msbuild (component). It works :-)
 #     - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 #
 ## RDP: Try conformance option.
@@ -247,6 +254,7 @@ for:
 -
   matrix:
     only:
+        # (C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\MSBuild\Current\Bin\MSBuild.exe).
         # "obsolete" :-< (16.3.0.45602).
       - image: Visual Studio 2019 Preview
 
@@ -267,7 +275,7 @@ for:
 #     - dir "C:\Program Files (x86)\Microsoft SDKs\Windows\"
 # 10.
 #     - dir "C:\Program Files (x86)\Microsoft SDKs\Windows Kits\"
-# 8.0, 8.1 and 10.
+# 8.0, 8.1, 10 and NETFXSDK.
 #     - dir "C:\Program Files (x86)\Windows Kits\"
 #
 # TestOnly: to check outdated msbuild (component). It works :-)
