@@ -6,8 +6,7 @@
 image:
     # Slow to start: on demand :-|
 #   - Visual Studio 2013
-# 
-  - Visual Studio 2015
+#   - Visual Studio 2015
     # Fast to start: pre-heated :->
 #   - Visual Studio 2015 Preview
 # 
@@ -17,8 +16,7 @@ image:
 # 
   - Visual Studio 2019
     # Slow to start: on demand :-|
-# 
-  - Visual Studio 2019 Preview
+#   - Visual Studio 2019 Preview
 
 environment:
   APPVEYOR_RDP_PASSWORD:
@@ -40,6 +38,7 @@ clone_folder: C:\projects\btrfs
 
 # 
 init:
+  - ver
 # Guess try:
 # 2015, 2017 and 2019: Not set :-|
 #   - echo %VCTargetsPath%
@@ -52,8 +51,7 @@ init:
 #   - which sed
 #   - sed --help
 # later!?
-# 
-  - where msbuild
+#   - where msbuild
 # 
   - msbuild -version
 
@@ -77,7 +75,16 @@ after_build:
 #   - if %Configuration%_%Platform%==Debug_x64  cd Debug\x64
 #   - if %Configuration%_%Platform%==Release_Win32  cd x86
 #   - if %Configuration%_%Platform%==Release_x64  cd x64
-  - appveyor PushArtifact btrfs.sys
+#
+#   - dir
+#   - appveyor PushArtifact btrfs.sys
+#   - appveyor PushArtifact mkbtrfs.exe
+#   - appveyor PushArtifact shellbtrfs.dll
+#   - appveyor PushArtifact ubtrfs.dll
+ # ''7zr' is not recognized as an internal or external command, operable program or batch file.'
+  - 7z a -mx WinBtrfs.7z *.dll *.exe *.sys
+# + pdb:   - 7z a -mx WinBtrfs.7z *.dll *.exe *.pdb *.sys
+  - appveyor PushArtifact WinBtrfs.7z
 
 test: off
 
@@ -153,7 +160,7 @@ for:
   matrix:
     only:
         # (C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe).
-        # (15.9.21.664).
+        # (Windows 10.0.14393, msbuild 15.9.21.664).
       - image: Visual Studio 2017
         # "obsolete" :-< (15.9.19.36755, + 'Windows SDK version 10.0.18362.0 was not found').
 ##       - image: Visual Studio 2017 Preview
@@ -197,7 +204,7 @@ for:
   matrix:
     only:
         # (C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe).
-        # (16.3.1.50202).
+        # (Windows 10.0.17763.805, msbuild 16.3.1.50202).
       - image: Visual Studio 2019
 
 ##   environment:
@@ -255,7 +262,7 @@ for:
   matrix:
     only:
         # (C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\MSBuild\Current\Bin\MSBuild.exe).
-        # "obsolete" :-< (16.3.0.45602).
+        # "obsolete" :-< (Windows 10.0.14393, msbuild 16.3.0.45602).
       - image: Visual Studio 2019 Preview
 
   before_build:
