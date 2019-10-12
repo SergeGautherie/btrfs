@@ -1471,6 +1471,11 @@ INT_PTR BtrfsChangeDriveLetter::DlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, 
                 for (wchar_t l = 'A'; l <= 'Z'; l++) {
                     bool found = true;
 
+                    // Work around https://jira.reactos.org/browse/CORE-16371 (ERROR_INVALID_PARAMETER).
+                    // C is fixed now: if (l == 'C' || l == 'D')
+                    if (l == 'D')
+                        continue;
+
                     drv[12] = l;
 
                     try {
