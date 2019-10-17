@@ -4,7 +4,7 @@
 #   2013 = v120;
 #   2015 = v140, 2017 = v141, 2019 = v142, ABI-backwards-compatible.
 image:
-    # Slow to start: on demand :-|
+    # (A bit = "30s") Slow to start: on demand :-|
 #   - Visual Studio 2013
 #   - Visual Studio 2015
     # Fast to start: pre-heated :->
@@ -51,9 +51,10 @@ init:
 #   - which sed
 #   - sed --help
 # later!?
-#   - where msbuild
 # 
   - msbuild -version
+# 
+  - where msbuild
 
 build:
   project: btrfs.sln
@@ -92,7 +93,8 @@ for:
 -
   matrix:
     only:
-        # (12.0.40629.0).
+        # (Windows 6.3.9600, msbuild 12.0.40629.0).
+        # (C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe).
       - image: Visual Studio 2013
 
 # When without 'string' commit.
@@ -109,7 +111,7 @@ for:
  # 'error MSB8020: The build tools for v142 (Platform Toolset = 'v142') cannot be found.'
  # v120 found, but errors:
  #  shellbtrfs, 'error C2011: '_FSCTL_GET_INTEGRITY_INFORMATION_BUFFER': 'struct' type redefinition' and more + no string_view support!
- #  ubtrfs: 'fatal error C1083: Cannot open include file: 'ata.h': No such file or directory'
+ #  ubtrfs: 'fatal error C1083: Cannot open include file: 'ata.h': No such file or directory' (As VS2019P used to have.)
 # Required: 
     - for %%p in (*.vcxproj) do  sed -i "s|<PlatformToolset>v14.<|<PlatformToolset>v120<|g" %%p
 #
@@ -118,11 +120,13 @@ for:
 -
   matrix:
     only:
+        # (Windows 6.3.9600, msbuild 14.0.25420.1).
         # (C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe).
-        # (14.0.25420.1).
       - image: Visual Studio 2015
-        # "obsolete" :-| (14.0.25420.1).
-##       - image: Visual Studio 2015 Preview
+        # "obsolete" :-| (Windows 6.3.9600, msbuild 14.0.25420.1).
+        # (C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe).
+## 
+      - image: Visual Studio 2015 Preview
 
 # When without 'string' commit.
   build:
@@ -159,11 +163,9 @@ for:
 -
   matrix:
     only:
-        # (C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe).
         # (Windows 10.0.14393, msbuild 15.9.21.664).
+        # (C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe).
       - image: Visual Studio 2017
-        # "obsolete" :-< (15.9.19.36755, + 'Windows SDK version 10.0.18362.0 was not found').
-##       - image: Visual Studio 2017 Preview
 
 ##   environment:
 ##     additional_flags: /permissive-
@@ -203,8 +205,29 @@ for:
 -
   matrix:
     only:
-        # (C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe).
+        # "obsolete" :-< (Windows 10.0.14393, msbuild 15.9.19.36755, + 'Windows SDK version 10.0.18362.0 was not found').
+        # (C:\Program Files (x86)\Microsoft Visual Studio\Preview\Community\MSBuild\15.0\Bin\MSBuild.exe).
+## 
+      - image: Visual Studio 2017 Preview
+
+  before_build:
+# Required: 
+    - for %%p in (*.vcxproj) do  sed -i "s|<PlatformToolset>v14.<|<PlatformToolset>v141<|g" %%p
+#
+      # 'error MSB8036: The Windows SDK version NNN was not found.':
+      #   10.0.18362.0, 10.0.17763.0.
+     # 8.1 found, but too old...
+     # 10.0.14393.0 found, but errors...
+    - for %%p in (*.vcxproj) do  sed -i "s|<WindowsTargetPlatformVersion>10\.0<|<WindowsTargetPlatformVersion>10.0.14393.0<|g" %%p
+      # 'error MSB8036: The Windows SDK version NNN was not found.':
+      #   10.0.18362.0, 10.0.17763.0, 8.1.
+     # 10.0.14393.0 found, but errors...
+    - sed -i "s|<WindowsTargetPlatformVersion>10\.0\.18362\.0<|<WindowsTargetPlatformVersion>10.0.14393.0<|g" btrfs.vcxproj
+-
+  matrix:
+    only:
         # (Windows 10.0.17763.805, msbuild 16.3.1.50202).
+        # (C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe).
       - image: Visual Studio 2019
 
 ##   environment:
@@ -261,8 +284,8 @@ for:
 -
   matrix:
     only:
+        # (Windows 10.0.17763.805, msbuild 16.4.0.50203).
         # (C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\MSBuild\Current\Bin\MSBuild.exe).
-        # "obsolete" :-< (Windows 10.0.14393, msbuild 16.3.0.45602).
       - image: Visual Studio 2019 Preview
 
   before_build:
@@ -271,18 +294,16 @@ for:
 ## TestOnly:     - for %%p in (*.vcxproj) do  sed -i "s|<PlatformToolset>v14.<|<PlatformToolset>v141<|g" %%p
 #
       # 'error MSB8036: The Windows SDK version NNN was not found.':
-      #   (10.0.18362.1,) 10.0, 10, 8.0, 8.
- # 10.0.18362.0, 10.0.17763.0, 8.1 found, but 3 errors:
- #  btrfs: 'error MSB4062: The "ValidateNTTargetVersion" task could not be loaded from the assembly C:\Program Files (x86)\Windows Kits\10\build\bin\Microsoft.DriverKit.Build.Tasks.16.0.dll.'
- #  shellbtrfs: 'fatal error C1083: Cannot open include file: 'mountmgr.h': No such file or directory'
- #  ubtrfs: 'fatal error C1083: Cannot open include file: 'ata.h': No such file or directory'
+# Re-Check (RDP), then merge it with VS2019 !!?
+      #   (²10.0.18362.1,) ²10.0, ²10, ²8.0, ²8.
+ # ²10.0.18362.0, ²10.0.17763.0, ²8.1 found, but 3 errors:
 ##    - for %%p in (*.vcxproj) do  sed -i "s|<WindowsTargetPlatformVersion>10\.0<|<WindowsTargetPlatformVersion>10.0.18362.0<|g" %%p
 #
-# v7.0A, v7.1A, v8.0, v8.0A, v8.1, v8.1A, v10.0A
+# v7.0A, v7.1A, v8.1A, v10.0A
 #     - dir "C:\Program Files (x86)\Microsoft SDKs\Windows\"
 # 10.
 #     - dir "C:\Program Files (x86)\Microsoft SDKs\Windows Kits\"
-# 8.0, 8.1, 10 and NETFXSDK.
+# 8.1, 10 and NETFXSDK.
 #     - dir "C:\Program Files (x86)\Windows Kits\"
 #
 # TestOnly: to check outdated msbuild (component). It works :-)
