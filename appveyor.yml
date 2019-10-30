@@ -18,9 +18,9 @@ image:
     # Slow to start: on demand :-|
 #   - Visual Studio 2019 Preview
 
-environment:
-  APPVEYOR_RDP_PASSWORD:
-    secure: amQ18PhcGpzi95VrjdE94A==
+# environment:
+#   APPVEYOR_RDP_PASSWORD:
+#     secure: amQ18PhcGpzi95VrjdE94A==
 
 version: VS201_.btrfs.appveyor.{build}
 skip_branch_with_pr: true
