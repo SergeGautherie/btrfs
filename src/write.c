@@ -2722,7 +2722,8 @@ NTSTATUS add_extent_to_fcb(_In_ fcb* fcb, _In_ uint64_t offset, _In_reads_bytes_
     extent* ext;
     LIST_ENTRY* le;
 
-    ext = ExAllocatePoolWithTag(PagedPool, offsetof(extent, extent_data) + edsize, ALLOC_TAG);
+    // --> Still leaking!
+    ext = ExAllocatePoolWithTag(PagedPool, offsetof(extent, extent_data) + edsize, 'ewHM'); // '63HM'.
     if (!ext) {
         ERR("out of memory\n");
         return STATUS_INSUFFICIENT_RESOURCES;
@@ -2848,7 +2849,8 @@ bool insert_extent_chunk(_In_ device_extension* Vcb, _In_ fcb* fcb, _In_ chunk* 
     if (!prealloc && data && !(fcb->inode_item.flags & BTRFS_INODE_NODATASUM)) {
         ULONG sl = (ULONG)(length / Vcb->superblock.sector_size);
 
-        csum = ExAllocatePoolWithTag(PagedPool, sl * sizeof(uint32_t), ALLOC_TAG);
+        // --> Already fixed!? Or Stage1 only?
+        csum = ExAllocatePoolWithTag(PagedPool, sl * sizeof(uint32_t), 'cwHM'); // '93HM'.
         if (!csum) {
             ERR("out of memory\n");
             ExFreePool(ed);
