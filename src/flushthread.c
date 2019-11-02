@@ -16,6 +16,10 @@
  * along with WinBtrfs.  If not, see <http://www.gnu.org/licenses/>. */
 
 #include "btrfs_drv.h"
+#undef ALLOC_TAG
+// Already fixed by 9204165 and/or 35124cb?
+// --> Already fixed!? Or Stage1 only?
+#define ALLOC_TAG '9BHM' // 'MHB9'.
 #include <ata.h>
 #include <ntddscsi.h>
 #include <ntddstor.h>

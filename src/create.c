@@ -17,6 +17,10 @@
 
 #include <sys/stat.h>
 #include "btrfs_drv.h"
+#undef ALLOC_TAG
+// Already fixed by 895b1e8?
+// --> Still leaking!
+#define ALLOC_TAG '5BHM' // 'MHB5'.
 #include <ntddstor.h>
 
 extern PDEVICE_OBJECT master_devobj;
@@ -50,7 +54,7 @@ fcb* create_fcb(device_extension* Vcb, POOL_TYPE pool_type) {
     fcb* fcb;
 
     if (pool_type == NonPagedPool) {
-        fcb = ExAllocatePoolWithTag(pool_type, sizeof(struct _fcb), ALLOC_TAG);
+        fcb = ExAllocatePoolWithTag(pool_type, sizeof(struct _fcb), '0cHM');
         if (!fcb) {
             ERR("out of memory\n");
             return NULL;
@@ -474,7 +478,7 @@ NTSTATUS load_dir_children(_Requires_lock_held_(_Curr_->tree_lock) device_extens
     ULONG num_children = 0;
     uint64_t max_index = 2;
 
-    fcb->hash_ptrs = ExAllocatePoolWithTag(PagedPool, sizeof(LIST_ENTRY*) * 256, ALLOC_TAG);
+    fcb->hash_ptrs = ExAllocatePoolWithTag(PagedPool, sizeof(LIST_ENTRY*) * 256, '1cHM');
     if (!fcb->hash_ptrs) {
         ERR("out of memory\n");
         return STATUS_INSUFFICIENT_RESOURCES;
@@ -482,7 +486,7 @@ NTSTATUS load_dir_children(_Requires_lock_held_(_Curr_->tree_lock) device_extens
 
     RtlZeroMemory(fcb->hash_ptrs, sizeof(LIST_ENTRY*) * 256);
 
-    fcb->hash_ptrs_uc = ExAllocatePoolWithTag(PagedPool, sizeof(LIST_ENTRY*) * 256, ALLOC_TAG);
+    fcb->hash_ptrs_uc = ExAllocatePoolWithTag(PagedPool, sizeof(LIST_ENTRY*) * 256, '2cHM');
     if (!fcb->hash_ptrs_uc) {
         ERR("out of memory\n");
         return STATUS_INSUFFICIENT_RESOURCES;
@@ -531,7 +535,7 @@ NTSTATUS load_dir_children(_Requires_lock_held_(_Curr_->tree_lock) device_extens
             goto cont;
         }
 
-        dc = ExAllocatePoolWithTag(PagedPool, sizeof(dir_child), ALLOC_TAG);
+        dc = ExAllocatePoolWithTag(PagedPool, sizeof(dir_child), '3cHM');
         if (!dc) {
             ERR("out of memory\n");
             return STATUS_INSUFFICIENT_RESOURCES;
@@ -546,7 +550,7 @@ NTSTATUS load_dir_children(_Requires_lock_held_(_Curr_->tree_lock) device_extens
         max_index = dc->index;
 
         dc->utf8.MaximumLength = dc->utf8.Length = di->n;
-        dc->utf8.Buffer = ExAllocatePoolWithTag(PagedPool, di->n, ALLOC_TAG);
+        dc->utf8.Buffer = ExAllocatePoolWithTag(PagedPool, di->n, '4cHM');
         if (!dc->utf8.Buffer) {
             ERR("out of memory\n");
             ExFreePool(dc);
@@ -556,7 +560,7 @@ NTSTATUS load_dir_children(_Requires_lock_held_(_Curr_->tree_lock) device_extens
         RtlCopyMemory(dc->utf8.Buffer, di->name, di->n);
 
         dc->name.MaximumLength = dc->name.Length = (uint16_t)utf16len;
-        dc->name.Buffer = ExAllocatePoolWithTag(PagedPool, dc->name.MaximumLength, ALLOC_TAG);
+        dc->name.Buffer = ExAllocatePoolWithTag(PagedPool, dc->name.MaximumLength, '5cHM');
         if (!dc->name.Buffer) {
             ERR("out of memory\n");
             ExFreePool(dc->utf8.Buffer);
@@ -801,7 +805,7 @@ NTSTATUS open_fcb(_Requires_lock_held_(_Curr_->tree_lock) _Requires_exclusive_lo
                 hardlink* hl;
                 ULONG stringlen;
 
-                hl = ExAllocatePoolWithTag(pooltype, sizeof(hardlink), ALLOC_TAG);
+                hl = ExAllocatePoolWithTag(pooltype, sizeof(hardlink), '9cHM');
                 if (!hl) {
                     ERR("out of memory\n");
                     reap_fcb(fcb);
@@ -814,7 +818,7 @@ NTSTATUS open_fcb(_Requires_lock_held_(_Curr_->tree_lock) _Requires_exclusive_lo
                 hl->utf8.Length = hl->utf8.MaximumLength = ir->n;
 
                 if (hl->utf8.Length > 0) {
-                    hl->utf8.Buffer = ExAllocatePoolWithTag(pooltype, hl->utf8.MaximumLength, ALLOC_TAG);
+                    hl->utf8.Buffer = ExAllocatePoolWithTag(pooltype, hl->utf8.MaximumLength, 'acHM');
                     RtlCopyMemory(hl->utf8.Buffer, ir->name, ir->n);
                 }
 
@@ -831,7 +835,7 @@ NTSTATUS open_fcb(_Requires_lock_held_(_Curr_->tree_lock) _Requires_exclusive_lo
                 if (stringlen == 0)
                     hl->name.Buffer = NULL;
                 else {
-                    hl->name.Buffer = ExAllocatePoolWithTag(pooltype, hl->name.MaximumLength, ALLOC_TAG);
+                    hl->name.Buffer = ExAllocatePoolWithTag(pooltype, hl->name.MaximumLength, 'bcHM');
 
                     if (!hl->name.Buffer) {
                         ERR("out of memory\n");
@@ -866,7 +870,7 @@ NTSTATUS open_fcb(_Requires_lock_held_(_Curr_->tree_lock) _Requires_exclusive_lo
                 hardlink* hl;
                 ULONG stringlen;
 
-                hl = ExAllocatePoolWithTag(pooltype, sizeof(hardlink), ALLOC_TAG);
+                hl = ExAllocatePoolWithTag(pooltype, sizeof(hardlink), 'ccHM');
                 if (!hl) {
                     ERR("out of memory\n");
                     reap_fcb(fcb);
@@ -879,7 +883,7 @@ NTSTATUS open_fcb(_Requires_lock_held_(_Curr_->tree_lock) _Requires_exclusive_lo
                 hl->utf8.Length = hl->utf8.MaximumLength = ier->n;
 
                 if (hl->utf8.Length > 0) {
-                    hl->utf8.Buffer = ExAllocatePoolWithTag(pooltype, hl->utf8.MaximumLength, ALLOC_TAG);
+                    hl->utf8.Buffer = ExAllocatePoolWithTag(pooltype, hl->utf8.MaximumLength, 'dcHM');
                     RtlCopyMemory(hl->utf8.Buffer, ier->name, ier->n);
                 }
 
@@ -896,7 +900,7 @@ NTSTATUS open_fcb(_Requires_lock_held_(_Curr_->tree_lock) _Requires_exclusive_lo
                 if (stringlen == 0)
                     hl->name.Buffer = NULL;
                 else {
-                    hl->name.Buffer = ExAllocatePoolWithTag(pooltype, hl->name.MaximumLength, ALLOC_TAG);
+                    hl->name.Buffer = ExAllocatePoolWithTag(pooltype, hl->name.MaximumLength, 'ecHM');
 
                     if (!hl->name.Buffer) {
                         ERR("out of memory\n");
@@ -940,7 +944,7 @@ NTSTATUS open_fcb(_Requires_lock_held_(_Curr_->tree_lock) _Requires_exclusive_lo
 
                 if (tp.item->key.offset == EA_REPARSE_HASH && di->n == sizeof(EA_REPARSE) - 1 && RtlCompareMemory(EA_REPARSE, di->name, di->n) == di->n) {
                     if (di->m > 0) {
-                        fcb->reparse_xattr.Buffer = ExAllocatePoolWithTag(PagedPool, di->m, ALLOC_TAG);
+                        fcb->reparse_xattr.Buffer = ExAllocatePoolWithTag(PagedPool, di->m, 'fcHM');
                         if (!fcb->reparse_xattr.Buffer) {
                             ERR("out of memory\n");
                             reap_fcb(fcb);
@@ -963,7 +967,7 @@ NTSTATUS open_fcb(_Requires_lock_held_(_Curr_->tree_lock) _Requires_exclusive_lo
                         else {
                             FILE_FULL_EA_INFORMATION* eainfo;
 
-                            fcb->ea_xattr.Buffer = ExAllocatePoolWithTag(PagedPool, di->m, ALLOC_TAG);
+                            fcb->ea_xattr.Buffer = ExAllocatePoolWithTag(PagedPool, di->m, 'gcHM');
                             if (!fcb->ea_xattr.Buffer) {
                                 ERR("out of memory\n");
                                 reap_fcb(fcb);
@@ -1011,7 +1015,7 @@ NTSTATUS open_fcb(_Requires_lock_held_(_Curr_->tree_lock) _Requires_exclusive_lo
                     }
                 } else if (tp.item->key.offset == EA_NTACL_HASH && di->n == sizeof(EA_NTACL) - 1 && RtlCompareMemory(EA_NTACL, di->name, di->n) == di->n) {
                     if (di->m > 0) {
-                        fcb->sd = ExAllocatePoolWithTag(PagedPool, di->m, ALLOC_TAG);
+                        fcb->sd = ExAllocatePoolWithTag(PagedPool, di->m, 'hcHM');
                         if (!fcb->sd) {
                             ERR("out of memory\n");
                             reap_fcb(fcb);
@@ -1058,7 +1062,7 @@ NTSTATUS open_fcb(_Requires_lock_held_(_Curr_->tree_lock) _Requires_exclusive_lo
                         return Status;
                     }
 
-                    dc = ExAllocatePoolWithTag(PagedPool, sizeof(dir_child), ALLOC_TAG);
+                    dc = ExAllocatePoolWithTag(PagedPool, sizeof(dir_child), 'icHM');
                     if (!dc) {
                         ERR("out of memory\n");
                         reap_fcb(fcb);
@@ -1068,7 +1072,7 @@ NTSTATUS open_fcb(_Requires_lock_held_(_Curr_->tree_lock) _Requires_exclusive_lo
                     RtlZeroMemory(dc, sizeof(dir_child));
 
                     dc->utf8.MaximumLength = dc->utf8.Length = di->n + 1 - sizeof(xapref);
-                    dc->utf8.Buffer = ExAllocatePoolWithTag(PagedPool, dc->utf8.MaximumLength, ALLOC_TAG);
+                    dc->utf8.Buffer = ExAllocatePoolWithTag(PagedPool, dc->utf8.MaximumLength, 'jcHM');
                     if (!dc->utf8.Buffer) {
                         ERR("out of memory\n");
                         ExFreePool(dc);
@@ -1079,7 +1083,7 @@ NTSTATUS open_fcb(_Requires_lock_held_(_Curr_->tree_lock) _Requires_exclusive_lo
                     RtlCopyMemory(dc->utf8.Buffer, &di->name[sizeof(xapref) - 1], dc->utf8.Length);
 
                     dc->name.MaximumLength = dc->name.Length = (uint16_t)utf16len;
-                    dc->name.Buffer = ExAllocatePoolWithTag(PagedPool, dc->name.MaximumLength, ALLOC_TAG);
+                    dc->name.Buffer = ExAllocatePoolWithTag(PagedPool, dc->name.MaximumLength, 'kcHM');
                     if (!dc->name.Buffer) {
                         ERR("out of memory\n");
                         ExFreePool(dc->utf8.Buffer);
@@ -1114,7 +1118,7 @@ NTSTATUS open_fcb(_Requires_lock_held_(_Curr_->tree_lock) _Requires_exclusive_lo
                 } else {
                     xattr* xa;
 
-                    xa = ExAllocatePoolWithTag(PagedPool, offsetof(xattr, data[0]) + di->m + di->n, ALLOC_TAG);
+                    xa = ExAllocatePoolWithTag(PagedPool, offsetof(xattr, data[0]) + di->m + di->n, 'lcHM');
                     if (!xa) {
                         ERR("out of memory\n");
                         reap_fcb(fcb);
@@ -1168,7 +1172,7 @@ NTSTATUS open_fcb(_Requires_lock_held_(_Curr_->tree_lock) _Requires_exclusive_lo
                     unique = is_extent_unique(Vcb, ed2->address, ed2->size, Irp);
             }
 
-            ext = ExAllocatePoolWithTag(pooltype, offsetof(extent, extent_data) + tp.item->size, ALLOC_TAG);
+            ext = ExAllocatePoolWithTag(pooltype, offsetof(extent, extent_data) + tp.item->size, 'mcHM');
             if (!ext) {
                 ERR("out of memory\n");
                 reap_fcb(fcb);
@@ -1337,7 +1341,7 @@ static NTSTATUS open_fcb_stream(_Requires_lock_held_(_Curr_->tree_lock) _Require
 
     xattr.Length = sizeof(xapref) - 1 + dc->utf8.Length;
     xattr.MaximumLength = xattr.Length + 1;
-    xattr.Buffer = ExAllocatePoolWithTag(PagedPool, xattr.MaximumLength, ALLOC_TAG);
+    xattr.Buffer = ExAllocatePoolWithTag(PagedPool, xattr.MaximumLength, 'ncHM');
     if (!xattr.Buffer) {
         ERR("out of memory\n");
         return STATUS_INSUFFICIENT_RESOURCES;
@@ -1830,20 +1834,20 @@ NTSTATUS add_dir_child(fcb* fcb, uint64_t inode, bool subvol, PANSI_STRING utf8,
     dir_child* dc;
     bool locked;
 
-    dc = ExAllocatePoolWithTag(PagedPool, sizeof(dir_child), ALLOC_TAG);
+    dc = ExAllocatePoolWithTag(PagedPool, sizeof(dir_child), 'ocHM');
     if (!dc) {
         ERR("out of memory\n");
         return STATUS_INSUFFICIENT_RESOURCES;
     }
 
-    dc->utf8.Buffer = ExAllocatePoolWithTag(PagedPool, utf8->Length, ALLOC_TAG);
+    dc->utf8.Buffer = ExAllocatePoolWithTag(PagedPool, utf8->Length, 'pcHM');
     if (!dc->utf8.Buffer) {
         ERR("out of memory\n");
         ExFreePool(dc);
         return STATUS_INSUFFICIENT_RESOURCES;
     }
 
-    dc->name.Buffer = ExAllocatePoolWithTag(PagedPool, name->Length, ALLOC_TAG);
+    dc->name.Buffer = ExAllocatePoolWithTag(PagedPool, name->Length, 'qcHM');
     if (!dc->name.Buffer) {
         ERR("out of memory\n");
         ExFreePool(dc->utf8.Buffer);
@@ -1949,7 +1953,7 @@ static NTSTATUS file_create_parse_ea(fcb* fcb, FILE_FULL_EA_INFORMATION* ea) {
         }
 
         if (!found) {
-            ea_item* item = ExAllocatePoolWithTag(PagedPool, sizeof(ea_item), ALLOC_TAG);
+            ea_item* item = ExAllocatePoolWithTag(PagedPool, sizeof(ea_item), 'rcHM');
             if (!item) {
                 ERR("out of memory\n");
                 Status = STATUS_INSUFFICIENT_RESOURCES;
@@ -2073,7 +2077,7 @@ static NTSTATUS file_create_parse_ea(fcb* fcb, FILE_FULL_EA_INFORMATION* ea) {
         le = le->Flink;
     }
 
-    buf = ExAllocatePoolWithTag(PagedPool, size, ALLOC_TAG);
+    buf = ExAllocatePoolWithTag(PagedPool, size, 'scHM');
     if (!buf) {
         ERR("out of memory\n");
         Status = STATUS_INSUFFICIENT_RESOURCES;
@@ -2163,7 +2167,7 @@ static NTSTATUS file_create2(_In_ PIRP Irp, _Requires_exclusive_lock_held_(_Curr
         return Status;
     }
 
-    utf8 = ExAllocatePoolWithTag(pool_type, utf8len + 1, ALLOC_TAG);
+    utf8 = ExAllocatePoolWithTag(pool_type, utf8len + 1, 'tcHM');
     if (!utf8) {
         ERR("out of memory\n");
         return STATUS_INSUFFICIENT_RESOURCES;
@@ -2427,7 +2431,7 @@ static NTSTATUS file_create2(_In_ PIRP Irp, _Requires_exclusive_lock_held_(_Curr
     }
 
     if (fcb->type == BTRFS_TYPE_DIRECTORY) {
-        fcb->hash_ptrs = ExAllocatePoolWithTag(PagedPool, sizeof(LIST_ENTRY*) * 256, ALLOC_TAG);
+        fcb->hash_ptrs = ExAllocatePoolWithTag(PagedPool, sizeof(LIST_ENTRY*) * 256, 'ucHM');
         if (!fcb->hash_ptrs) {
             ERR("out of memory\n");
             reap_fileref(Vcb, fileref);
@@ -2443,7 +2447,7 @@ static NTSTATUS file_create2(_In_ PIRP Irp, _Requires_exclusive_lock_held_(_Curr
 
         RtlZeroMemory(fcb->hash_ptrs, sizeof(LIST_ENTRY*) * 256);
 
-        fcb->hash_ptrs_uc = ExAllocatePoolWithTag(PagedPool, sizeof(LIST_ENTRY*) * 256, ALLOC_TAG);
+        fcb->hash_ptrs_uc = ExAllocatePoolWithTag(PagedPool, sizeof(LIST_ENTRY*) * 256, 'vcHM');
         if (!fcb->hash_ptrs_uc) {
             ERR("out of memory\n");
             reap_fileref(Vcb, fileref);
@@ -2622,7 +2626,7 @@ static NTSTATUS create_stream(_Requires_lock_held_(_Curr_->tree_lock) _Requires_
             return STATUS_OBJECT_NAME_INVALID;
 
         fpus2.Length = fpus2.MaximumLength = fpus->Length;
-        fpus2.Buffer = ExAllocatePoolWithTag(pool_type, fpus2.MaximumLength, ALLOC_TAG);
+        fpus2.Buffer = ExAllocatePoolWithTag(pool_type, fpus2.MaximumLength, 'wcHM');
 
         if (!fpus2.Buffer) {
             ERR("out of memory\n");
@@ -2736,7 +2740,7 @@ static NTSTATUS create_stream(_Requires_lock_held_(_Curr_->tree_lock) _Requires_
 
     fcb->adsxattr.Length = (uint16_t)utf8len + sizeof(xapref) - 1;
     fcb->adsxattr.MaximumLength = fcb->adsxattr.Length + 1;
-    fcb->adsxattr.Buffer = ExAllocatePoolWithTag(pool_type, fcb->adsxattr.MaximumLength, ALLOC_TAG);
+    fcb->adsxattr.Buffer = ExAllocatePoolWithTag(pool_type, fcb->adsxattr.MaximumLength, 'xcHM');
     if (!fcb->adsxattr.Buffer) {
         ERR("out of memory\n");
         reap_fcb(fcb);
@@ -2809,7 +2813,7 @@ static NTSTATUS create_stream(_Requires_lock_held_(_Curr_->tree_lock) _Requires_
 
     fileref->fcb = fcb;
 
-    dc = ExAllocatePoolWithTag(PagedPool, sizeof(dir_child), ALLOC_TAG);
+    dc = ExAllocatePoolWithTag(PagedPool, sizeof(dir_child), 'ycHM');
     if (!dc) {
         ERR("out of memory\n");
         reap_fileref(Vcb, fileref);
@@ -2820,7 +2824,7 @@ static NTSTATUS create_stream(_Requires_lock_held_(_Curr_->tree_lock) _Requires_
     RtlZeroMemory(dc, sizeof(dir_child));
 
     dc->utf8.MaximumLength = dc->utf8.Length = fcb->adsxattr.Length + 1 - sizeof(xapref);
-    dc->utf8.Buffer = ExAllocatePoolWithTag(PagedPool, dc->utf8.MaximumLength, ALLOC_TAG);
+    dc->utf8.Buffer = ExAllocatePoolWithTag(PagedPool, dc->utf8.MaximumLength, 'zcHM');
     if (!dc->utf8.Buffer) {
         ERR("out of memory\n");
         ExFreePool(dc);
@@ -2832,7 +2836,7 @@ static NTSTATUS create_stream(_Requires_lock_held_(_Curr_->tree_lock) _Requires_
     RtlCopyMemory(dc->utf8.Buffer, &fcb->adsxattr.Buffer[sizeof(xapref) - 1], fcb->adsxattr.Length + 1 - sizeof(xapref));
 
     dc->name.MaximumLength = dc->name.Length = stream->Length;
-    dc->name.Buffer = ExAllocatePoolWithTag(pool_type, dc->name.MaximumLength, ALLOC_TAG);
+    dc->name.Buffer = ExAllocatePoolWithTag(pool_type, dc->name.MaximumLength, 'AcHM');
     if (!dc->name.Buffer) {
         ERR("out of memory\n");
         ExFreePool(dc->utf8.Buffer);
@@ -3024,7 +3028,7 @@ static NTSTATUS file_create(PIRP Irp, _Requires_lock_held_(_Curr_->tree_lock) _R
     while (i > 0 && fnus->Buffer[i-1] != '\\' && fnus->Buffer[i-1] != '/') { i--; }
 
     fpus.MaximumLength = (USHORT)((j - i + 2) * sizeof(WCHAR));
-    fpus.Buffer = ExAllocatePoolWithTag(pool_type, fpus.MaximumLength, ALLOC_TAG);
+    fpus.Buffer = ExAllocatePoolWithTag(pool_type, fpus.MaximumLength, 'BcHM');
     if (!fpus.Buffer) {
         ERR("out of memory\n");
         Status = STATUS_INSUFFICIENT_RESOURCES;
@@ -3126,7 +3130,7 @@ static NTSTATUS file_create(PIRP Irp, _Requires_lock_held_(_Curr_->tree_lock) _R
 
     FileObject->FsContext = fileref->fcb;
 
-    ccb = ExAllocatePoolWithTag(NonPagedPool, sizeof(*ccb), ALLOC_TAG);
+    ccb = ExAllocatePoolWithTag(NonPagedPool, sizeof(*ccb), 'CcHM');
     if (!ccb) {
         ERR("out of memory\n");
         Status = STATUS_INSUFFICIENT_RESOURCES;
@@ -3357,7 +3361,7 @@ static NTSTATUS get_reparse_block(fcb* fcb, uint8_t** data) {
         if (size == 0)
             return STATUS_INVALID_PARAMETER;
 
-        *data = ExAllocatePoolWithTag(PagedPool, size, ALLOC_TAG);
+        *data = ExAllocatePoolWithTag(PagedPool, size, 'DcHM');
         if (!*data) {
             ERR("out of memory\n");
             return STATUS_INSUFFICIENT_RESOURCES;
@@ -3386,7 +3390,7 @@ static NTSTATUS get_reparse_block(fcb* fcb, uint8_t** data) {
 
             reqlen = offsetof(REPARSE_DATA_BUFFER, SymbolicLinkReparseBuffer.PathBuffer) + subnamelen + printnamelen;
 
-            rdb = ExAllocatePoolWithTag(PagedPool, reqlen, ALLOC_TAG);
+            rdb = ExAllocatePoolWithTag(PagedPool, reqlen, 'EcHM');
 
             if (!rdb) {
                 ERR("out of memory\n");
@@ -3449,7 +3453,7 @@ static NTSTATUS get_reparse_block(fcb* fcb, uint8_t** data) {
             return Status;
         }
 
-        *data = ExAllocatePoolWithTag(PagedPool, fcb->reparse_xattr.Length, ALLOC_TAG);
+        *data = ExAllocatePoolWithTag(PagedPool, fcb->reparse_xattr.Length, 'FcHM');
         if (!*data) {
             ERR("out of memory\n");
             return STATUS_INSUFFICIENT_RESOURCES;
@@ -3482,7 +3486,7 @@ static void fcb_load_csums(_Requires_lock_held_(_Curr_->tree_lock) device_extens
 
             len = (ext->extent_data.compression == BTRFS_COMPRESSION_NONE ? ed2->num_bytes : ed2->size) / Vcb->superblock.sector_size;
 
-            ext->csum = ExAllocatePoolWithTag(NonPagedPool, (ULONG)(len * sizeof(uint32_t)), ALLOC_TAG);
+            ext->csum = ExAllocatePoolWithTag(NonPagedPool, (ULONG)(len * sizeof(uint32_t)), 'GcHM');
             if (!ext->csum) {
                 ERR("out of memory\n");
                 goto end;
@@ -3790,7 +3794,7 @@ static NTSTATUS open_file2(device_extension* Vcb, ULONG RequestedDisposition, PO
                 if (fileref->fcb->ea_xattr.Buffer)
                     ExFreePool(fileref->fcb->ea_xattr.Buffer);
 
-                fileref->fcb->ea_xattr.Buffer = ExAllocatePoolWithTag(pool_type, IrpSp->Parameters.Create.EaLength, ALLOC_TAG);
+                fileref->fcb->ea_xattr.Buffer = ExAllocatePoolWithTag(pool_type, IrpSp->Parameters.Create.EaLength, 'HcHM');
                 if (!fileref->fcb->ea_xattr.Buffer) {
                     ERR("out of memory\n");
 
@@ -3911,7 +3915,7 @@ static NTSTATUS open_file2(device_extension* Vcb, ULONG RequestedDisposition, PO
 
     FileObject->FsContext = fileref->fcb;
 
-    ccb = ExAllocatePoolWithTag(NonPagedPool, sizeof(*ccb), ALLOC_TAG);
+    ccb = ExAllocatePoolWithTag(NonPagedPool, sizeof(*ccb), 'IcHM');
     if (!ccb) {
         ERR("out of memory\n");
 
@@ -4100,7 +4104,7 @@ NTSTATUS open_fileref_by_inode(_Requires_exclusive_lock_held_(_Curr_->fcb_lock) 
                         if (stringlen == 0)
                             name.Buffer = NULL;
                         else {
-                            name.Buffer = ExAllocatePoolWithTag(PagedPool, name.MaximumLength, ALLOC_TAG);
+                            name.Buffer = ExAllocatePoolWithTag(PagedPool, name.MaximumLength, 'JcHM');
 
                             if (!name.Buffer) {
                                 ERR("out of memory\n");
@@ -4145,7 +4149,7 @@ NTSTATUS open_fileref_by_inode(_Requires_exclusive_lock_held_(_Curr_->fcb_lock) 
                         if (stringlen == 0)
                             name.Buffer = NULL;
                         else {
-                            name.Buffer = ExAllocatePoolWithTag(PagedPool, name.MaximumLength, ALLOC_TAG);
+                            name.Buffer = ExAllocatePoolWithTag(PagedPool, name.MaximumLength, 'KcHM');
 
                             if (!name.Buffer) {
                                 ERR("out of memory\n");
@@ -4264,7 +4268,7 @@ NTSTATUS open_fileref_by_inode(_Requires_exclusive_lock_held_(_Curr_->fcb_lock) 
                 if (hl_alloc)
                     ExFreePool(name.Buffer);
 
-                name.Buffer = ExAllocatePoolWithTag(PagedPool, name.MaximumLength, ALLOC_TAG);
+                name.Buffer = ExAllocatePoolWithTag(PagedPool, name.MaximumLength, 'LcHM');
 
                 if (!name.Buffer) {
                     ERR("out of memory\n");
@@ -4815,7 +4819,7 @@ NTSTATUS __stdcall drv_create(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp) {
             goto exit;
         }
 
-        ccb = ExAllocatePoolWithTag(NonPagedPool, sizeof(*ccb), ALLOC_TAG);
+        ccb = ExAllocatePoolWithTag(NonPagedPool, sizeof(*ccb), 'McHM');
         if (!ccb) {
             ERR("out of memory\n");
             Status = STATUS_INSUFFICIENT_RESOURCES;
