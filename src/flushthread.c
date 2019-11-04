@@ -6712,9 +6712,9 @@ static NTSTATUS flush_fileref(file_ref* fileref, LIST_ENTRY* batchlist, PIRP Irp
 
         // add DIR_INDEX (0x60)
 
-       Status = insert_tree_item_batch(batchlist, fileref->fcb->Vcb, fileref->parent->fcb->subvol, fileref->parent->fcb->inode, TYPE_DIR_INDEX,
-                                       fileref->dc->index, di2, disize, Batch_Insert);
-       if (!NT_SUCCESS(Status)) {
+        Status = insert_tree_item_batch(batchlist, fileref->fcb->Vcb, fileref->parent->fcb->subvol, fileref->parent->fcb->inode, TYPE_DIR_INDEX,
+                                        fileref->dc->index, di2, disize, Batch_Insert);
+        if (!NT_SUCCESS(Status)) {
             ERR("insert_tree_item_batch returned %08x\n", Status);
             ExFreePool(di2);
             return Status;
