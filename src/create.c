@@ -571,8 +571,8 @@ NTSTATUS load_dir_children(_Requires_lock_held_(_Curr_->tree_lock) device_extens
         Status = utf8_to_utf16(dc->name.Buffer, utf16len, &utf16len, di->name, di->n);
         if (!NT_SUCCESS(Status)) {
             ERR("utf8_to_utf16 2 returned %08x\n", Status);
-            ExFreePool(dc->utf8.Buffer);
             ExFreePool(dc->name.Buffer);
+            ExFreePool(dc->utf8.Buffer);
             ExFreePool(dc);
             goto cont;
         }
@@ -580,8 +580,8 @@ NTSTATUS load_dir_children(_Requires_lock_held_(_Curr_->tree_lock) device_extens
         Status = RtlUpcaseUnicodeString(&dc->name_uc, &dc->name, true);
         if (!NT_SUCCESS(Status)) {
             ERR("RtlUpcaseUnicodeString returned %08x\n", Status);
-            ExFreePool(dc->utf8.Buffer);
             ExFreePool(dc->name.Buffer);
+            ExFreePool(dc->utf8.Buffer);
             ExFreePool(dc);
             goto cont;
         }
@@ -1095,8 +1095,8 @@ NTSTATUS open_fcb(_Requires_lock_held_(_Curr_->tree_lock) _Requires_exclusive_lo
                     Status = utf8_to_utf16(dc->name.Buffer, utf16len, &utf16len, dc->utf8.Buffer, dc->utf8.Length);
                     if (!NT_SUCCESS(Status)) {
                         ERR("utf8_to_utf16 2 returned %08x\n", Status);
-                        ExFreePool(dc->utf8.Buffer);
                         ExFreePool(dc->name.Buffer);
+                        ExFreePool(dc->utf8.Buffer);
                         ExFreePool(dc);
                         reap_fcb(fcb);
                         return Status;
@@ -1105,8 +1105,8 @@ NTSTATUS open_fcb(_Requires_lock_held_(_Curr_->tree_lock) _Requires_exclusive_lo
                     Status = RtlUpcaseUnicodeString(&dc->name_uc, &dc->name, true);
                     if (!NT_SUCCESS(Status)) {
                         ERR("RtlUpcaseUnicodeString returned %08x\n", Status);
-                        ExFreePool(dc->utf8.Buffer);
                         ExFreePool(dc->name.Buffer);
+                        ExFreePool(dc->utf8.Buffer);
                         ExFreePool(dc);
                         reap_fcb(fcb);
                         return Status;
@@ -1871,8 +1871,8 @@ NTSTATUS add_dir_child(fcb* fcb, uint64_t inode, bool subvol, PANSI_STRING utf8,
     Status = RtlUpcaseUnicodeString(&dc->name_uc, name, true);
     if (!NT_SUCCESS(Status)) {
         ERR("RtlUpcaseUnicodeString returned %08x\n", Status);
-        ExFreePool(dc->utf8.Buffer);
         ExFreePool(dc->name.Buffer);
+        ExFreePool(dc->utf8.Buffer);
         ExFreePool(dc);
         return Status;
     }
@@ -2852,8 +2852,8 @@ static NTSTATUS create_stream(_Requires_lock_held_(_Curr_->tree_lock) _Requires_
     Status = RtlUpcaseUnicodeString(&dc->name_uc, &dc->name, true);
     if (!NT_SUCCESS(Status)) {
         ERR("RtlUpcaseUnicodeString returned %08x\n", Status);
-        ExFreePool(dc->utf8.Buffer);
         ExFreePool(dc->name.Buffer);
+        ExFreePool(dc->utf8.Buffer);
         ExFreePool(dc);
         reap_fileref(Vcb, fileref);
         free_fileref(parfileref);
@@ -2883,8 +2883,8 @@ static NTSTATUS create_stream(_Requires_lock_held_(_Curr_->tree_lock) _Requires_
     }
 
     if (existing_dc) {
-        ExFreePool(dc->utf8.Buffer);
         ExFreePool(dc->name.Buffer);
+        ExFreePool(dc->utf8.Buffer);
         ExFreePool(dc);
         reap_fileref(Vcb, fileref);
         free_fileref(parfileref);
