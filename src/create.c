@@ -1840,6 +1840,7 @@ NTSTATUS add_dir_child(fcb* fcb, uint64_t inode, bool subvol, PANSI_STRING utf8,
         return STATUS_INSUFFICIENT_RESOURCES;
     }
 
+    // LEAKING!!
     dc->utf8.Buffer = ExAllocatePoolWithTag(PagedPool, utf8->Length, 'pcHM');
     if (!dc->utf8.Buffer) {
         ERR("out of memory\n");

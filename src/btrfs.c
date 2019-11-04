@@ -4528,11 +4528,15 @@ static NTSTATUS mount_vol(_In_ PDEVICE_OBJECT DeviceObject, _In_ PIRP Irp) {
     ExInitializePagedLookasideList(&Vcb->tree_data_lookaside, NULL, NULL, 0, sizeof(tree_data), 'wbHM', 0);
     ExInitializePagedLookasideList(&Vcb->traverse_ptr_lookaside, NULL, NULL, 0, sizeof(traverse_ptr), 'xbHM', 0);
     ExInitializePagedLookasideList(&Vcb->batch_item_lookaside, NULL, NULL, 0, sizeof(batch_item), 'ybHM', 0);
+    // LEAKING!!
     ExInitializePagedLookasideList(&Vcb->fileref_lookaside, NULL, NULL, 0, sizeof(file_ref), 'zbHM', 0);
+    // LEAKING!!
     ExInitializePagedLookasideList(&Vcb->fcb_lookaside, NULL, NULL, 0, sizeof(fcb), 'AbHM', 0);
     ExInitializePagedLookasideList(&Vcb->name_bit_lookaside, NULL, NULL, 0, sizeof(name_bit), 'BbHM', 0);
     ExInitializeNPagedLookasideList(&Vcb->range_lock_lookaside, NULL, NULL, 0, sizeof(range_lock), 'CbHM', 0);
+    // LEAKING!!
     ExInitializeNPagedLookasideList(&Vcb->fileref_np_lookaside, NULL, NULL, 0, sizeof(file_ref_nonpaged), 'DbHM', 0);
+    // LEAKING!!
     ExInitializeNPagedLookasideList(&Vcb->fcb_np_lookaside, NULL, NULL, 0, sizeof(fcb_nonpaged), 'EbHM', 0);
     init_lookaside = true;
 
