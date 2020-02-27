@@ -4,6 +4,7 @@
 #   2013 = v120;
 #   2015 = v140, 2017 = v141, 2019 = v142, ABI-backwards-compatible.
 image:
+  - Visual Studio 2019
     # (A bit = "30s") Slow to start: on demand :-|
 #   - Visual Studio 2013
 #   - Visual Studio 2015
@@ -14,13 +15,12 @@ image:
     # Slow to start: on demand :-|
 #   - Visual Studio 2017 Preview
 # 
-  - Visual Studio 2019
     # Slow to start: on demand :-|
 #   - Visual Studio 2019 Preview
 
-# environment:
-#   APPVEYOR_RDP_PASSWORD:
-#     secure: amQ18PhcGpzi95VrjdE94A==
+environment:
+  APPVEYOR_RDP_PASSWORD:
+    secure: amQ18PhcGpzi95VrjdE94A==
 
 version: VS201_.btrfs.appveyor.{build}
 skip_branch_with_pr: true
@@ -280,7 +280,8 @@ for:
 #     - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 #
 ## RDP: Try conformance option.
-#     - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+# 
+    - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 -
   matrix:
     only:
